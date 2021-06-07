@@ -1,51 +1,84 @@
 #include <iostream>
 #include <string>
+#include <iomanip>
 #include <fstream>
 #include <conio.h>
-#include <iomanip>
+#include <array>
 
 using namespace std;
 
-int main_menu(); // declare prototype
-void login(bool &, bool &);
-void Add();
+int showmenu ();
+void login (bool &, bool &);
+void add_pupil ();
+void display_student_details ();
 
-int main()
+const int max_rows = 5;
+const int max_column = 6;
+
+string student_details[max_rows][max_column];
+
+
+int main ()
 {
+    system("cls");
+
     int option;
-    bool loged_in_as_Ad = false, logedin = false;
+    bool loged_in_As_Ad = false, loged_in = false;
 
-    login(loged_in_as_Ad, logedin);
+    login(loged_in_As_Ad, loged_in);
 
-    if(loged_in_as_Ad || logedin)
+    if(loged_in == true || loged_in_As_Ad == true)
     {
-        system("cls");
-        option = main_menu();
-
-        switch (option)
+        do
         {
-        case 1:
-            if(loged_in_as_Ad)
-                Add();
-            else
+            option = showmenu();
+            switch (option)
             {
-                cout<<"You don't have access to this option\n";
-                system("PAUSE");
-                system ("cls");
-                main_menu();
-            }
-            break;
+                case 1:
+                if(loged_in_As_Ad)
+                {
+                    add_pupil();
+                    system("cls");
+                }
+                break;
 
-        }
+                case 2:
+                cout << "Delete" << endl;
+                break;
+
+                case 3:
+                cout << "Search" << endl;
+                break;
+
+                case 4:
+                cout << "Edit" << endl;
+                break;
+
+                case 5:
+                system("cls");
+                display_student_details();
+                getch();
+                system("cls");
+                break;
+
+                case 6:
+                cout << "Exit" << endl;
+                break;
+
+            }
+        } while (option!=6);
+
     }
+
 
 
     return 0;
 }
 
-void login(bool &loged_in_as_AD, bool &logedin)
+void login (bool &loged_in_as_Ad, bool &loged_in)
 {
-    int password, password1, password2, password3, password4;
+    int user_password, password1, password2, password3, password4;
+
 
     ifstream credentials("credentials.txt");
 
@@ -55,56 +88,104 @@ void login(bool &loged_in_as_AD, bool &logedin)
 
     do
     {
-        cout<<"Login with your password\n";
-        cout<<"password: "; cin>>password;
+        cout<<"Enter the Password: ";
+        cin>>user_password;
 
-        if(password == password1 || password == password2)
+        if(user_password == password1 ||user_password == password2)
         {
-            loged_in_as_AD = true;
+            loged_in_as_Ad = true;
             return;
         }
-        else if(password == password3 || password == password4)
+
+        else if(user_password == password3 || user_password == password4)
         {
-            logedin = true;
+            loged_in = true;
             return;
         }
+
         else
         {
-            cout<<"Incorrect password. try again\n";
-        }
-
-    }while(loged_in_as_AD == false && logedin == false);
-
-}
-
-int main_menu()
-{
-    int option;
-
-    cout<<"Press:\n";
-	cout<<"1. Add New Pupil\n";
-	cout<<"2. Delete Pupil\n";
-	cout<<"3. Search For Pupil\n";
-	cout<<"4. Edit Pupil Record\n";
-	cout<<"5. Display All Pupils By Grade\n";
-	cout<<"6. Exit\n";
-	cin>>option;
-
-	if(option > 6 || option < 1)
-    {
-        cout<<"Invalid option\n";
-        main_menu();
+            cout<<"Access Denied!\n";
+            getch();
+            system("cls");
     }
 
-    return option;
+    } while(loged_in == false && loged_in_as_Ad == false);
+
+
 }
 
-void Add()
+int showmenu ()
 {
-    /*ofstream students("students.txt");
+    int opt;
 
-    students<<left<<setw(20)<<"student ID"<<left<<setw(30)<<"first name"<<left<<setw(30)<<"surname"<<left<<setw(15)<<"Age"<<left<<setw(15)<<"Grade"<<left<<setw(20)<<"Guardians number"<<endl;
+    cout<<setw(45)<< "Main Menu\n";
+    cout<<"Press: \n";
+    cout<<"1. To add new pupil\n";
+    cout<<"2. To delete pupil\n";
+    cout<<"3. To search for pupil\n";
+    cout<<"4. To edit pupil record\n";
+    cout<<"5. To display all pupils by grade\n";
+    cout<<"6. To exit\n";
 
-    students.close();*/
+    cout<<"\nchoice: ";
+    cin>>opt;
 
+    if(opt>6||opt<1)
+    {
+        cout<<"Invalid option\n";
+        getch();
+        system ("cls");
+        showmenu();
+    }
+
+    return opt;
+}
+
+void add_pupil ()
+{
+    char choice;
+
+    system("cls");
+
+    for(int counter = 0; counter < max_rows; counter++)
+    {
+        cout<<"Enter student ID: "; cin>>student_details[counter][0];
+        cout<<"Enter first name: "; cin>>student_details[counter][1];
+        cout<<"Enter surname: "; cin>>student_details[counter][2];
+        cout<<"Enter age: "; cin>>student_details[counter][3];
+        cout<<"Enter grade: "; cin>>student_details[counter][4];
+        cout<<"Enter guardians phone number: "; cin>>student_details[counter][5];
+
+        cout<<"\nPress Y to continue or N to save student details and go back to the main menu: "; cin>>choice;
+
+        if(choice == 'y' || choice == 'Y')
+            continue;
+        else
+            return;
+    }
+
+}
+
+void display_student_details()
+{
+    cout << "===============================================================================================\n";
+
+    cout<<left<<setw(15)<<"Pupil ID"<<left<<setw(15)<<"First name"<<left<<setw(15)<<"surname"<<left<<setw(15)<<"Age"<<left<<setw(15)<<"Grade"<<left<<setw(15)<<"Guardians cell number"<<endl;
+
+    cout << "===============================================================================================\n";
+
+    for(int rows = 0; rows < max_rows; rows++)
+    {
+
+        for(int columns = 0; columns < max_column; columns++)
+        {
+            cout<<left<<setw(15)<<student_details[rows][columns];
+        }
+
+        cout<<endl;
+
+    }
+    
+    //cout << "===============================================================================================\n";
 }
