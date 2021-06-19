@@ -1,21 +1,31 @@
 #include <iostream>
 #include <string>
-#include <iomanip>
 #include <fstream>
+#include <iomanip>
 #include <conio.h>
-#include <array>
-
+#include <cstdlib>
 using namespace std;
 
 int showmenu ();
 void login (bool &, bool &);
 void add_pupil ();
 void display_student_details ();
+void update_file();
+void edit();
+void search();
+void retrieve_data();
 
-const int max_rows = 5;
-const int max_column = 6;
-
-string student_details[max_rows][max_column];
+struct student_details
+{
+    string first_name;
+    string surname;
+    int student_ID;
+    int age;
+    int grade;
+    int guardians_phone_number;
+};
+const int MAX_ROWS = 10;
+student_details students[MAX_ROWS];
 
 
 int main ()
@@ -23,19 +33,23 @@ int main ()
     system("cls");
 
     int option;
-    bool loged_in_As_Ad = false, loged_in = false;
+    bool loged_in_As_Administrator = false, loged_in = false;
 
-    login(loged_in_As_Ad, loged_in);
+    retrieve_data();
 
-    if(loged_in == true || loged_in_As_Ad == true)
+    login(loged_in_As_Administrator, loged_in);
+
+    if(loged_in == true || loged_in_As_Administrator == true)
     {
+        system("cls");
+        
         do
         {
             option = showmenu();
             switch (option)
             {
                 case 1:
-                if(loged_in_As_Ad)
+                if(loged_in_As_Administrator)
                 {
                     add_pupil();
                     system("cls");
@@ -47,11 +61,16 @@ int main ()
                 break;
 
                 case 3:
-                cout << "Search" << endl;
+                system("cls");
+                search();
+                getch();
                 break;
 
                 case 4:
-                cout << "Edit" << endl;
+                system("cls");
+                edit();
+                getch();
+                system("cls");
                 break;
 
                 case 5:
@@ -62,7 +81,8 @@ int main ()
                 break;
 
                 case 6:
-                cout << "Exit" << endl;
+                update_file();
+                exit(0);
                 break;
 
             }
@@ -75,45 +95,61 @@ int main ()
     return 0;
 }
 
-void login (bool &loged_in_as_Ad, bool &loged_in)
+
+void login (bool &loged_in_as_Administrator, bool &loged_in)
 {
     int user_password, password1, password2, password3, password4;
 
 
     ifstream credentials("credentials.txt");
 
-    while(credentials>>password1>>password2>>password3>>password4)
-
-    credentials.close();
-
-    do
+    if(credentials)
     {
-        cout<<"Enter the Password: ";
-        cin>>user_password;
+        while(credentials>>password1>>password2>>password3>>password4)
 
-        if(user_password == password1 ||user_password == password2)
+        credentials.close();
+        
+        do
         {
-            loged_in_as_Ad = true;
-            return;
-        }
+            cout<<"Enter the Password: ";
+            cin>>user_password;
 
-        else if(user_password == password3 || user_password == password4)
-        {
-            loged_in = true;
-            return;
-        }
+            if(user_password == password1 ||user_password == password2)
+            {
+                loged_in_as_Administrator = true;
+                return;
+            }
 
-        else
-        {
-            cout<<"Access Denied!\n";
-            getch();
-            system("cls");
+            else if(user_password == password3 || user_password == password4)
+            {
+                loged_in = true;
+                return;
+            }
+
+            else
+            {
+                system("cls");
+                cout<<"Access Denied! invalid username or password\n\n";
+                cout<<"Press any key to try again";
+                getch();
+                system("cls");
+            }
+
+        } while(loged_in == false && loged_in_as_Administrator == false);
+
+
     }
 
-    } while(loged_in == false && loged_in_as_Ad == false);
+    else
+    {
+        cerr<<"error opening credentials file!\n";
+        getch();
+        exit(1)
+    }
 
-
+    
 }
+
 
 int showmenu ()
 {
@@ -142,22 +178,25 @@ int showmenu ()
     return opt;
 }
 
+
 void add_pupil ()
 {
     char choice;
 
     system("cls");
 
-    for(int counter = 0; counter < max_rows; counter++)
+    for(int row = 0; row < MAX_ROWS; row++)
     {
-        cout<<"Enter student ID: "; cin>>student_details[counter][0];
-        cout<<"Enter first name: "; cin>>student_details[counter][1];
-        cout<<"Enter surname: "; cin>>student_details[counter][2];
-        cout<<"Enter age: "; cin>>student_details[counter][3];
-        cout<<"Enter grade: "; cin>>student_details[counter][4];
-        cout<<"Enter guardians phone number: "; cin>>student_details[counter][5];
+        cout<<"Enter student ID: "; cin>>students[row].student_ID;
+        cout<<"Enter first name: "; cin>>students[row].first_name;
+        cout<<"Enter surname: "; cin>>students[row].surname;
+        cout<<"Enter age: "; cin>>students[row].age;
+        cout<<"Enter grade: "; cin>>students[row].grade;
+        cout<<"Enter guardians phone number: "; cin>>students[row].guardians_phone_number;
 
-        cout<<"\nPress Y to continue or N to save student details and go back to the main menu: "; cin>>choice;
+        cout<<"\nPress Y to continue or any key to save student details and go back to the main menu: "; cin>>choice;
+
+        system("cls");
 
         if(choice == 'y' || choice == 'Y')
             continue;
@@ -167,6 +206,7 @@ void add_pupil ()
 
 }
 
+
 void display_student_details()
 {
     cout << "===============================================================================================\n";
@@ -175,17 +215,172 @@ void display_student_details()
 
     cout << "===============================================================================================\n";
 
-    for(int rows = 0; rows < max_rows; rows++)
+    for(int rows = 0; rows < MAX_ROWS; rows++)
     {
-
-        for(int columns = 0; columns < max_column; columns++)
+        if(students[rows].student_ID != 0)
         {
-            cout<<left<<setw(15)<<student_details[rows][columns];
+            cout<<left<<setw(15)<<students[rows].student_ID;
+            cout<<left<<setw(15)<<students[rows].first_name;
+            cout<<left<<setw(15)<<students[rows].surname;
+            cout<<left<<setw(15)<<students[rows].age;
+            cout<<left<<setw(15)<<students[rows].grade;
+            cout<<left<<setw(15)<<students[rows].guardians_phone_number<<endl;
         }
 
-        cout<<endl;
+        else
+        {
+            break;
+        }
 
     }
     
     cout << "===============================================================================================\n";
+
+}
+
+
+void update_file()
+{
+    ofstream inputfile;
+    inputfile.open("students.txt");
+
+    inputfile<<left<<setw(15)<<"Pupil ID"<<left<<setw(15)<<"First name"<<left<<setw(15)<<"surname"<<left<<setw(15)<<"Age"<<left<<setw(15)<<"Grade"<<left<<setw(15)<<"Guardians cell number"<<endl;
+
+    for(int row = 0; row < MAX_ROWS; row++)
+    {
+        inputfile<<left<<setw(15)<<students[row].student_ID;
+        inputfile<<left<<setw(15)<<students[row].first_name;
+        inputfile<<left<<setw(15)<<students[row].surname;
+        inputfile<<left<<setw(15)<<students[row].age;
+        inputfile<<left<<setw(15)<<students[row].grade;
+        inputfile<<left<<setw(15)<<students[row].guardians_phone_number<<endl;
+    }
+
+    inputfile.close();
+} 
+
+
+void search()
+{
+    int ID;
+
+    cout<<"Enter student ID: "; cin>>ID;
+
+    for(int row = 0; row < MAX_ROWS; row++)
+    {
+        if(ID == students[row].student_ID)
+        {
+            cout << "===============================================================================================\n";
+
+            cout<<left<<setw(15)<<"Pupil ID"<<left<<setw(15)<<"First name"<<left<<setw(15)<<"surname"<<left<<setw(15)<<"Age"<<left<<setw(15)<<"Grade"<<left<<setw(15)<<"Guardians cell number"<<endl;
+
+            cout << "===============================================================================================\n";
+
+            cout<<left<<setw(15)<<students[row].student_ID<<left<<setw(15)<<students[row].first_name<<left<<setw(15)<<students[row].surname<<left<<setw(15)<<students[row].age<<left<<setw(15)<<students[row].grade<<left<<setw(15)<<students[row].guardians_phone_number<<endl;
+
+            cout << "===============================================================================================\n";
+
+        }
+    }
+}
+
+
+void edit()
+{
+    int ID;
+    int option;
+    int row = 0;
+
+    cout<<"Enter student ID: "; cin>>ID;
+
+    for(row < MAX_ROWS; row++;)
+    {
+        if(ID == students[row].student_ID)
+        {
+            cout << "===============================================================================================\n";
+
+            cout<<left<<setw(15)<<"Pupil ID"<<left<<setw(15)<<"First name"<<left<<setw(15)<<"surname"<<left<<setw(15)<<"Age"<<left<<setw(15)<<"Grade"<<left<<setw(15)<<"Guardians cell number"<<endl;
+
+            cout << "===============================================================================================\n";
+
+            cout<<left<<setw(15)<<students[row].student_ID<<left<<setw(15)<<students[row].first_name<<left<<setw(15)<<students[row].surname<<left<<setw(15)<<students[row].age<<left<<setw(15)<<students[row].grade<<left<<setw(15)<<students[row].guardians_phone_number<<endl;
+
+            cout << "===============================================================================================\n";
+
+        }
+
+    }
+
+    cout << "Press: \n";
+    cout << "1. To edit ID Number"<< endl;
+    cout << "2. To edit First name"<< endl;
+    cout << "3. To edit Surname"<< endl;
+    cout << "4. To edit age "<< endl;
+    cout << "5. To edit grade"<< endl; 
+    cout << "6. To edit guardian's phone number"<< endl;
+    cout << "7. To return to the mainmenu"<<endl<<endl;
+    cout << "choice: "; cin>>option;
+
+    system("cls");
+    
+    //Add user input validation!!!!!@@######@%@%%%%%%%%%%%%%%%%%%%%%%
+    
+    switch(option)
+    {
+        case 1:
+        cout<<"Enter new ID: ";
+        cin>>students[row-1].student_ID;
+        break;
+
+        case 2:
+        cout<<"Enter new first name: ";
+        cin>>students[row-1].first_name;
+        break;
+
+        case 3:
+        cout<<"Enter new surname: ";
+        cin>>students[row-1].surname;
+        break;
+
+        case 4:
+        cout<<"Enter new age: ";
+        cin>>students[row-1].age;
+        break;
+
+        case 5:
+        cout<<"Enter new grade: ";
+        cin>>students[row-1].grade;
+        break;
+
+        case 6:
+        cout<<"Enter new guardian's phone number: ";
+        cin>>students[row-1].guardians_phone_number;
+        break;
+    }
+
+    return;
+}
+
+
+void retrieve_data()
+{
+    string h1, h2, h3, h4, h5, h6;
+
+    ifstream outputfile("students.txt");
+    if(outputfile)
+    {
+        outputfile>>h3>>h1>>h2>>h4>>h5>>h6;
+
+        for(int row = 0; row < MAX_ROWS; row++)
+        {
+            outputfile>>students[row].student_ID>>students[row].first_name>>students[row].surname>>students[row].age>>students[row].grade>>students[row].guardians_phone_number;
+        }   
+    }
+    else
+    {
+        cerr <<"file cannot open"<<endl;
+        system("pause");
+        exit(1);
+    }
+    outputfile.close();
 }
